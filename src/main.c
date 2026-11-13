@@ -5,7 +5,6 @@
 #define RGFW_IMPLEMENTATION
 #include "RGFW.h"
 
-static unsigned char icon[4 * 3 * 3] = {0xFF, 0x00, 0x00, 0xFF, 0xFF, 0x00, 0x00, 0xFF, 0xFF, 0x00, 0x00, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x00, 0xFF, 0xFF, 0xFF, 0x00, 0xFF, 0xFF, 0x00, 0x00, 0xFF, 0xFF, 0x00, 0x00, 0xFF, 0xFF, 0x00, 0x00, 0xFF};
 
 /* fill buffer with a color, clearing anything that was on it */
 static void clear(u8* buffer, i32 bufferWidth, i32 w, i32 h, u8 color[4]) {
@@ -23,8 +22,6 @@ static void clear(u8* buffer, i32 bufferWidth, i32 w, i32 h, u8 color[4]) {
     for (y = 0; y < (u32)h; y++) {
         for (x = 0; x < (u32)bufferWidth; x++) {
             u32 index = (y * 4 * (u32)bufferWidth) + x * 4;
-
-            /* copy the color to that pixel */
             memcpy(&buffer[index], color, 4 * sizeof(u8));
         }
     }
@@ -51,10 +48,16 @@ static void drawRect(u8* buffer, i32 bufferWidth, i32 x, i32 y, i32 w, i32 h, u8
 }
 
 u8* generateRandomColors(int size){
-    u8* colArray = (u8*)malloc(size*sizeof(u8));
+    u8* colArray = (u8*)malloc((size * 4)*sizeof(u8));
 
-    for(int i;i < size;i++){
-        colArray[i] = 255;
+    for(int i = 0;i < size * 4;i++){
+        if(i % 4 == 0){
+
+            colArray[i] = 255;
+            continue;
+        }
+        colArray[i] = rand();
+        
     }
 
     return colArray;
@@ -69,7 +72,11 @@ int main(void) {
 	i32 width = 500;
 	i32 height = 500;
 
-    puts(generateRandomColors(10));
+    srand(time(0));
+
+    for (int i = 0; i < 10 * 4; i++){
+        printf("%d \n",generateRandomColors(10)[i]);
+    }
 
 	if (mon) {
 		width = (i32)((float)mon->mode.w * mon->pixelRatio);
@@ -81,9 +88,9 @@ int main(void) {
 
 
     while (RGFW_window_shouldClose(win) == RGFW_FALSE) {
+        srand(time(0));
 		RGFW_pollEvents();
-
-        u8 BackGroundColor[4] = {0, 0, 0, 0xFF};
+        u8* BackGroundColor = generateRandomColors(1);
         i32 w, h;
 
         RGFW_window_getSize(win, &w, &h);
